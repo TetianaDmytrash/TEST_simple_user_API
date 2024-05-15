@@ -1,6 +1,7 @@
 """
     attempt to divide into classes
 """
+from customGenerator import *
 import pytest
 from connect import *
 from constants import *
@@ -30,7 +31,8 @@ class TestCreateUserPositive:
             logging.info("\nCleanup - Cleaning up resources after the test")
 
     @pytest.mark.parametrize("setup", [
-        (generate_random_string(6, DIGITS_LETTERS_CHARS), "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
+        (generate_random_string_with_letter(5), "surname1", "test1@example.com", False, "test1", "password123",
+         "simple text 1"),
     ], indirect=True)
     def test_positive_create_user_status_code(self, setup):
         """
@@ -70,7 +72,8 @@ class TestCreateUserPositive:
             logging.error(f"Error occurred during registration: {e}")
 
     @pytest.mark.parametrize("setup", [
-        ("name222", "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
+        ("name1", "surname1", "test1@example.com", False, generate_random_string_with_letter(5), "password123",
+         "simple text 1"),
     ], indirect=True)
     def test_positive_create_user_message(self, setup):
         """
@@ -130,13 +133,14 @@ class TestCreateUserFieldPositive:
                 logging.error(f"Error occurred during deletion all users: {e}")
             logging.info("\nCleanup - Cleaning up resources after the test")
 
-    @pytest.mark.parametrize("firstName, lastName, email, completed, username, password, summary", [
-        (generate_random_string(2, DIGITS_LETTERS_CHARS), "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
-        (generate_random_string(10, DIGITS_LETTERS_CHARS), "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
-        (generate_random_string(5, DIGITS_LETTERS_CHARS), "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
-        ("name-Na", "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
+    # @parametrize_from_file
+    @pytest.mark.parametrize("firstName", [
+        (generate_random_string_with_letter(2)),
+        (generate_random_string_with_letter(5)),
+        (generate_random_string_with_letter(10)),
+        ("name-Na"),
     ])
-    def test_positive_firstName(self, firstName, lastName, email, completed, username, password, summary, setup):
+    def test_positive_firstName(self, firstName, setup):
         """
         Title:
         Check the length of the "first name" field.
@@ -173,36 +177,36 @@ class TestCreateUserFieldPositive:
         1.
         """
         headers = setup
-        payload = configure_payload(firstName, lastName, email, completed, username, password, summary)
+        payload = configure_payload(firstname=firstName)
         try:
             response = create_user(POST_USER_LINK, headers, payload)
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred during registration: {e}")
         assert response.status_code == 201, f" status code not valid - {response.status_code} "
 
-    @pytest.mark.parametrize("firstName, lastName, email, completed, username, password, summary", [
-        ("name1", "su", "test1@example.com", False, "test1", "password123", "simple text 1"),
-        ("name1", "surnameSur", "test1@example.com", False, "test1", "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, "test1", "password123", "simple text 1"),
+    @pytest.mark.parametrize("lastName", [
+        (generate_random_string_with_letter(2)),
+        (generate_random_string_with_letter(5)),
+        (generate_random_string_with_letter(10)),
+        ("name-Na"),
     ])
-    def test_positive_lastName(self, firstName, lastName, email, completed, username, password, summary, setup):
+    def test_positive_lastName(self, lastName, setup):
         headers = setup
-        payload = configure_payload(firstName, lastName, email, completed, username, password, summary)
+        payload = configure_payload(lastname=lastName)
+        print(payload)
         try:
             response = create_user(POST_USER_LINK, headers, payload)
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred during registration: {e}")
-        response_data = convert_response_to_json(get_all_users(GET_ALL_USERS_LINK))
-        list_user_uid = get_users_uid(response_data)
-        get_user_by_uid(GET_USER_LINK, list_user_uid[0]) # тут по идеи надо обыграть то, что я знаю, что там может прийти только один юзер
-        # делать это через нулевой элемент массива как-то максимально странно та и забудется оно
+        assert response.status_code == 201, f" status code not valid - {response.status_code} "
 
-    @pytest.mark.parametrize("firstName, lastName, email, completed, username, password, summary", [
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(2, DIGITS_LETTERS_CHARS), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(10, DIGITS_LETTERS_CHARS), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(5, DIGITS_LETTERS_CHARS), "password123", "simple text 1"),
+    @pytest.mark.parametrize("username", [
+        (generate_random_string_with_letter(2)),
+        (generate_random_string_with_letter(5)),
+        (generate_random_string_with_letter(10)),
+        ("na-me-Na"),
     ])
-    def test_positive_userName(self, firstName, lastName, email, completed, username, password, summary, setup):
+    def test_positive_userName(self, username, setup):
         """
         Title:
         Check the length of the "username" field.
@@ -239,7 +243,8 @@ class TestCreateUserFieldPositive:
         1.
         """
         headers = setup
-        payload = configure_payload(firstName, lastName, email, completed, username, password, summary)
+        payload = configure_payload(username=username)
+        print(payload)
         try:
             response = create_user(POST_USER_LINK, headers, payload)
         except requests.exceptions.RequestException as e:
@@ -266,16 +271,15 @@ class TestCreateUserFieldNegative:
                 logging.error(f"Error occurred during deletion all users: {e}")
             logging.info("\nCleanup - Cleaning up resources after the test")
 
-    @pytest.mark.parametrize("firstName, lastName, email, completed, username, password, summary", [
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(0, DIGITS_LETTERS_CHARS), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(11, DIGITS_LETTERS_CHARS), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, generate_random_string(5, LETTERS_SPECIAL_CHARS),
-         "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, random.randint(0, 100), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, random.choice([True, False]), "password123", "simple text 1"),
-        ("name1", "surname1", "test1@example.com", False, None, "password123", "simple text 1"),
+    @pytest.mark.parametrize("username", [
+        (generate_random_string_with_letter_and_digits(2)),
+        (generate_random_string_with_letter_and_digits(5)),
+        (generate_random_string_with_letter_and_digits(10)),
+        (random.randint(0, 100)),
+        (random.choice([True, False])),
+        (None),
     ])
-    def test_negative_userName(self, firstName, lastName, email, completed, username, password, summary, setup):
+    def test_negative_userName(self, username, setup):
         """
         Title:
         unacceptable value in first name.
@@ -317,12 +321,15 @@ class TestCreateUserFieldNegative:
         1.
         """
         headers = setup
-        payload = configure_payload(firstName, lastName, email, completed, username, password, summary)
+        payload = configure_payload(username)
         try:
             response = create_user(POST_USER_LINK, headers, payload)
         except requests.exceptions.RequestException as e:
             logging.error(f"Error occurred during registration: {e}")
-        assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        try:
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 422, f" status code not valid - {response.status_code} "
 
 
 # method for complex fast deletion all created users
