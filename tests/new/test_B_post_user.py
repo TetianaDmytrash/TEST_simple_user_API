@@ -36,11 +36,8 @@ class CommonFixture:
                                                 summary=summary)
         finally:
             self._logger.info(f"cleanup for test 'create user': delete user")
-            try:
-                delete_all_users(delete_url=DELETE_USER_LINK,
-                                 get_url=GET_ALL_USERS_LINK)
-            except requests.exceptions.RequestException as e:
-                self._logger.error(f"error occurred during deletion all users: {e}")
+            delete_all_users(delete_url=DELETE_USER_LINK,
+                             get_url=GET_ALL_USERS_LINK)
 
     @pytest.fixture()
     def simple_configuration(self):
@@ -55,11 +52,8 @@ class CommonFixture:
             yield configure_headers()
         finally:
             self._logger.info(f"cleanup for test 'create user': delete one user.")
-            try:
-                delete_all_users(delete_url=DELETE_USER_LINK,
-                                 get_url=GET_ALL_USERS_LINK)
-            except requests.exceptions.RequestException as e:
-                self._logger.error(f"error occurred during deletion all users: {e}")
+            delete_all_users(delete_url=DELETE_USER_LINK,
+                             get_url=GET_ALL_USERS_LINK)
 
 
 class TestCreateUserPositive(CommonFixture):
@@ -80,14 +74,10 @@ class TestCreateUserPositive(CommonFixture):
         """"""
         self._logger.info(f" --- test: status code after create user --- ")
         data = full_configuration
-
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            assert response.status_code == 201
-            self._logger.info(f"status code is {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 201
 
     @pytest.mark.parametrize("full_configuration", [
         (generate_random_string(5),
@@ -102,13 +92,10 @@ class TestCreateUserPositive(CommonFixture):
         """"""
         self._logger.info(f" --- test: message after create user --- ")
         data = full_configuration
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            decoded_response_text = convert_json_string_in_dict(json_data=response.text)
-            assert decoded_response_text['message'] == f"success create user"
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"Error occurred during creating user: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        decoded_response_text = convert_json_string_in_dict(json_data=response.text)
+        assert decoded_response_text['message'] == f"success create user"
 
 
 class TestCreateUserDataMatch(CommonFixture):
@@ -125,25 +112,18 @@ class TestCreateUserDataMatch(CommonFixture):
         """"""
         self._logger.info(f" --- test: data match after create user --- ")
         data = full_configuration
-        try:
-            response_post = create_user(post_url=POST_USER_LINK,
-                                        data=data)
-            assert response_post.status_code == 201
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user: {e}")
-
-        try:
-            decoded_data = convert_json_string_in_dict(json_data=data)
-            response_get = get_list_of_all_users(get_url=GET_ALL_USERS_LINK)
-            for user in response_get:
-                assert decoded_data["firstName"] == user["firstName"]
-                assert decoded_data["lastName"] == user["lastName"]
-                assert decoded_data["username"] == user["username"]
-                assert decoded_data["completed"] == user["completed"]
-                assert decoded_data["password"] == user["password"]
-                assert decoded_data["summary"] == user["summary"]
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during getting user full information: {e}")
+        response_post = create_user(post_url=POST_USER_LINK,
+                                    data=data)
+        assert response_post.status_code == 201
+        decoded_data = convert_json_string_in_dict(json_data=data)
+        response_get = get_list_of_all_users(get_url=GET_ALL_USERS_LINK)
+        for user in response_get:
+            assert decoded_data["firstName"] == user["firstName"]
+            assert decoded_data["lastName"] == user["lastName"]
+            assert decoded_data["username"] == user["username"]
+            assert decoded_data["completed"] == user["completed"]
+            assert decoded_data["password"] == user["password"]
+            assert decoded_data["summary"] == user["summary"]
 
 
 class TestCreateUserFieldPositive(CommonFixture):
@@ -160,13 +140,10 @@ class TestCreateUserFieldPositive(CommonFixture):
     def test_positive_user_firstname(self, firstname, simple_configuration):
         self._logger.info(f" --- test: create user with firstname: {firstname} --- ")
         data = configure_payload_user_create(firstname=firstname)
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            assert response.status_code == 201
-            self._logger.info(f"status code is {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user with valid firstname: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 201
 
     @pytest.mark.parametrize("lastname", [
         (generate_random_string(2)),
@@ -177,13 +154,10 @@ class TestCreateUserFieldPositive(CommonFixture):
     def test_positive_user_lastname(self, lastname, simple_configuration):
         self._logger.info(f" --- test: create user with lastname: {lastname} --- ")
         data = configure_payload_user_create(lastname=lastname)
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                         data=data)
-            assert response.status_code == 201
-            self._logger.info(f"status code is {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user with valid lastname: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 201
 
     @pytest.mark.parametrize("username", [
         (generate_random_string(2)),
@@ -192,14 +166,12 @@ class TestCreateUserFieldPositive(CommonFixture):
         (generate_random_string_with_hyphen(6)),
     ])
     def test_positive_user_username(self, username, simple_configuration):
+        self._logger.info(f" --- test: create user with username: {username} --- ")
         data = configure_payload_user_create(username=username)
-        try:
-            self._logger.info(f" --- test: create user with username: {username} --- ")
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            assert response.status_code == 201
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user with username: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 201
 
 
 class TestCreateUserNegative(CommonFixture):
@@ -219,13 +191,10 @@ class TestCreateUserNegative(CommonFixture):
     def test_negative_after_fail_attempt_to_create_user_status_code(self, full_configuration):
         self._logger.info(f" --- test: status code after fail attempt to create user with empty username --- ")
         data = full_configuration
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            assert response.status_code == 400
-            self._logger.info(f"status code is {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during catch exception when create user with empty name: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 400
 
     @pytest.mark.parametrize("full_configuration", [
         ("",
@@ -239,14 +208,11 @@ class TestCreateUserNegative(CommonFixture):
     def test_negative_after_fail_attempt_to_create_user_message(self, full_configuration):
         self._logger.info(f" --- test: message after fail attempt to create user with empty firstName --- ")
         data = full_configuration
-        try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            decoded_response_text = convert_json_string_in_dict(json_data=response.text)
-            self._logger.info(f" --- {decoded_response_text['message']}")
-            assert decoded_response_text['message'] == f"FirstName has invalid length."
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during catch exception when create user with empty name: {e}")
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
+        decoded_response_text = convert_json_string_in_dict(json_data=response.text)
+        self._logger.info(f" --- {decoded_response_text['message']}")
+        assert decoded_response_text['message'] == f"FirstName has invalid length."
 
 
 class TestCreateUserNegativeInvalidURL(CommonFixture):
@@ -267,13 +233,10 @@ class TestCreateUserNegativeInvalidURL(CommonFixture):
         """"""
         self._logger.info(f" --- test: status code after attempt to create user with invalid URL --- ")
         data = full_configuration
-        try:
-            response = create_user(post_url=POST_USER_LINK_MISTAKE,
-                                   data=data)
-            assert response.status_code == 404
-            self._logger.info(f"status code is {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during post bad url (check status code): {e}")
+        response = create_user(post_url=POST_USER_LINK_MISTAKE,
+                               data=data)
+        self._logger.info(f"status code is {response.status_code}")
+        assert response.status_code == 404
 
     @pytest.mark.parametrize("full_configuration", [
         (generate_random_string(4),
@@ -288,18 +251,15 @@ class TestCreateUserNegativeInvalidURL(CommonFixture):
         """"""
         self._logger.info(f" --- test: schema after fail attempt to create user with invalid URL --- ")
         data = full_configuration
+        response = create_user(post_url=POST_USER_LINK_MISTAKE,
+                               data=data)
+        self._logger.info(f"response: {response.text}")
         try:
-            response = create_user(post_url=POST_USER_LINK_MISTAKE,
-                                   data=data)
-            self._logger.info(f"response: {response.text}")
-            try:
-                jsonschema.validate(instance=convert_json_string_in_dict(response.text),
-                                    schema=schema_error.schema_error_without_message)
-                self._logger.info(f"response is up to date with schema")
-            except jsonschema.exceptions.ValidationError as e:
-                self._logger.error(f"data does not match schema: {e}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during compare schema error which come when server get bad URL: {e}")
+            jsonschema.validate(instance=convert_json_string_in_dict(response.text),
+                                schema=schema_error.schema_error_without_message)
+            self._logger.info(f"response is up to date with schema")
+        except jsonschema.exceptions.ValidationError as e:
+            self._logger.error(f"data does not match schema: {e}")
 
 
 class TestCreateUserFieldNegative(CommonFixture):
@@ -323,15 +283,12 @@ class TestCreateUserFieldNegative(CommonFixture):
         """"""
         self._logger.info(f" --- test: fail attempt to create user with firstname: {firstname} --- ")
         data = configure_payload_user_create(firstname=firstname)
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
         try:
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            try:
-                assert response.status_code == 400, f" status code not valid - {response.status_code} "
-            except AssertionError:
-                assert response.status_code == 500, f" status code not valid - {response.status_code} "
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user: {e}")
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 500, f" status code not valid - {response.status_code} "
 
     @pytest.mark.parametrize("lastname", [
         generate_random_string(11),
@@ -346,17 +303,14 @@ class TestCreateUserFieldNegative(CommonFixture):
         "\n"
     ])
     def test_negative_user_lastname(self, lastname, simple_configuration):
+        self._logger.info(f" --- test: fail creating user with lastname: {lastname} --- ")
         data = configure_payload_user_create(lastname=lastname)
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
         try:
-            self._logger.info(f" --- test: fail creating user with lastname: {lastname} --- ")
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            try:
-                assert response.status_code == 400, f" status code not valid - {response.status_code} "
-            except AssertionError:
-                assert response.status_code == 500, f" status code not valid - {response.status_code} "
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user: {e}")
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 500, f" status code not valid - {response.status_code} "
 
     @pytest.mark.parametrize("username", [
         generate_random_string(11),
@@ -371,14 +325,11 @@ class TestCreateUserFieldNegative(CommonFixture):
         "\n"
     ])
     def test_negative_user_username(self, username, simple_configuration):
+        self._logger.info(f" --- test: fail creating user with username: {username} --- ")
         data = configure_payload_user_create(username=username)
+        response = create_user(post_url=POST_USER_LINK,
+                               data=data)
         try:
-            self._logger.info(f" --- test: fail creating user with username: {username} --- ")
-            response = create_user(post_url=POST_USER_LINK,
-                                   data=data)
-            try:
-                assert response.status_code == 400, f" status code not valid - {response.status_code} "
-            except AssertionError:
-                assert response.status_code == 500, f" status code not valid - {response.status_code} "
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during creating user: {e}")
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 500, f" status code not valid - {response.status_code} "

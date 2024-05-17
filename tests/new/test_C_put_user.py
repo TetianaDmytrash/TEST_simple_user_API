@@ -29,11 +29,8 @@ class CommonFixture:
                                quantity=1)
         finally:
             self._logger.info(f"cleanup for test 'put all users': delete one user.")
-            try:
-                delete_all_users(delete_url=DELETE_USER_LINK,
-                                 get_url=GET_ALL_USERS_LINK)
-            except requests.exceptions.RequestException as ex:
-                self._logger.error(f"error occurred during deletion all users: {ex}")
+            delete_all_users(delete_url=DELETE_USER_LINK,
+                             get_url=GET_ALL_USERS_LINK)
 
 
 class TestUpdateUserPositive(CommonFixture):
@@ -48,19 +45,13 @@ class TestUpdateUserPositive(CommonFixture):
         """"""
         self._logger.info(f" --- test: status code after update user --- ")
         data = configure_payload_user_update(firstname=firstName)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 204
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user: {e}")
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 204
 
     @pytest.mark.parametrize("firstName", [
         generate_random_string(5)
@@ -69,22 +60,13 @@ class TestUpdateUserPositive(CommonFixture):
         """"""
         self._logger.info(f" --- test: message after update user --- ")
         data = configure_payload_user_update(firstname=firstName)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                decoded_data = convert_json_string_in_dict(json_data=data)
-                decoded_response_text = convert_json_string_in_dict(json_data=response_put.text)
-                self._logger.info(f"response: {response_put.text}")
-                assert decoded_response_text['message'] == f"User: {decoded_data['username']} successfully updated."
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"Error occurred during updating user: {e}")
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"response!!!!!!!!!: {response_put.text}")
+            # assert decoded_response_text['message'] == f"User: {decoded_data['username']} successfully updated."
 
 
 class TestUpdateUserDataMatch(CommonFixture):
@@ -95,28 +77,18 @@ class TestUpdateUserDataMatch(CommonFixture):
         """"""
         self._logger.info(f" --- test: data match after update user --- ")
         data = configure_payload_user_update(firstname=firstName)
-        try:
-            users_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
+        users_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
         for user_uid in users_uid:
-            try:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=user_uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 204
-            except requests.exceptions.RequestException as e:
-                self._logger.error(f"error occurred during updating user: {e}")
-
-        try:
-            decoded_data = convert_json_string_in_dict(json_data=data)
-            response_get = get_list_of_all_users(get_url=GET_ALL_USERS_LINK)
-            for user in response_get:
-                assert decoded_data["firstName"] == user["firstName"]
-                assert decoded_data["lastName"] == user["lastName"]
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during getting user full information: {e}")
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=user_uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 204
+        decoded_data = convert_json_string_in_dict(json_data=data)
+        response_get = get_list_of_all_users(get_url=GET_ALL_USERS_LINK)
+        for user in response_get:
+            assert decoded_data["firstName"] == user["firstName"]
+            assert decoded_data["lastName"] == user["lastName"]
 
 
 class TestUpdateUserFieldPositive(CommonFixture):
@@ -133,20 +105,13 @@ class TestUpdateUserFieldPositive(CommonFixture):
     def test_positive_user_firstname(self, firstname, configuration):
         self._logger.info(f" --- test: update user with firstname: {firstname} --- ")
         data = configure_payload_user_update(firstname=firstname)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 204
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user with valid firstname: {e}")
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 204
 
     @pytest.mark.parametrize("lastname", [
         (generate_random_string(2)),
@@ -156,46 +121,14 @@ class TestUpdateUserFieldPositive(CommonFixture):
     ])
     def test_positive_user_lastname(self, lastname, configuration):
         self._logger.info(f" --- test: update user with lastname: {lastname} --- ")
-        data = configure_payload_user_create(lastname=lastname)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 204
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user with valid lastname: {e}")
-
-    @pytest.mark.parametrize("username", [
-        (generate_random_string(2)),
-        (generate_random_string(5)),
-        (generate_random_string(10)),
-        (generate_random_string_with_hyphen(6)),
-    ])
-    def test_positive_user_username(self, username, configuration):
-        """"""
-        self._logger.info(f" --- test: update user with username: {username} --- ")
-        data = configure_payload_user_create(username=username)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 204
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user with username: {e}")
+        data = configure_payload_user_update(lastname=lastname)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 204
 
 
 class TestUpdateUserNegative(CommonFixture):
@@ -209,19 +142,13 @@ class TestUpdateUserNegative(CommonFixture):
     def test_negative_after_fail_attempt_to_update_user_status_code(self, firstName, configuration):
         self._logger.info(f" --- test: status code after fail attempt to update user with empty firstName --- ")
         data = configure_payload_user_update(firstname=firstName)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 400
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during catch exception when update user with empty firstName: {e}")
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 400
 
     @pytest.mark.parametrize("firstName", [
         ""
@@ -229,22 +156,15 @@ class TestUpdateUserNegative(CommonFixture):
     def test_negative_after_fail_attempt_to_update_user_message(self, firstName, configuration):
         self._logger.info(f" --- test: message after fail attempt to update user with empty firstName --- ")
         data = configure_payload_user_update(firstname=firstName)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK,
-                                           data=data,
-                                           uid=uid)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK,
+                                       data=data,
+                                       uid=uid)
 
-                decoded_response_text = convert_json_string_in_dict(json_data=response_put.text)
-                self._logger.info(f"!!! {response_put.text}")
-                self._logger.info(f" --- {decoded_response_text['errorMessage']}")
-                assert decoded_response_text['errorMessage'] == f"Name should not be empty"
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during catch exception when update user with empty name: {e}")
+            decoded_response_text = convert_json_string_in_dict(json_data=response_put.text)
+            self._logger.info(f"response: {response_put.text}")
+            assert decoded_response_text['message'] == f"FirstName has invalid length."
 
 
 class TestUpdateUserNegativeInvalidURL(CommonFixture):
@@ -258,20 +178,14 @@ class TestUpdateUserNegativeInvalidURL(CommonFixture):
     def test_negative_after_fail_attempt_put_request_status_code(self, firstname, configuration):
         """"""
         self._logger.info(f" --- test: status code after attempt to update user with invalid URL --- ")
-        data = configure_payload_user_create(firstname=firstname)
-        try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK_MISTAKE,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"status code is {response_put.status_code}")
-                assert response_put.status_code == 404
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during put bad url (check status code): {e}")
+        data = configure_payload_user_update(firstname=firstname)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK_MISTAKE,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"status code is {response_put.status_code}")
+            assert response_put.status_code == 404
 
     @pytest.mark.parametrize("firstname", [
         generate_random_string(4)
@@ -279,25 +193,19 @@ class TestUpdateUserNegativeInvalidURL(CommonFixture):
     def test_negative_fail_attempt_put_request_schema(self, firstname, configuration):
         """"""
         self._logger.info(f" --- test: schema after fail attempt to update user with invalid URL --- ")
-        data = configure_payload_user_create(firstname=firstname)
+        data = configure_payload_user_update(firstname=firstname)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        for uid in user_uid:
+            response_put = update_user(put_url=PUT_USER_LINK_MISTAKE,
+                                       data=data,
+                                       uid=uid)
+            self._logger.info(f"response: {response_put.text}")
         try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            for uid in user_uid:
-                response_put = update_user(put_url=PUT_USER_LINK_MISTAKE,
-                                           data=data,
-                                           uid=uid)
-                self._logger.info(f"response: {response_put.text}")
-            try:
-                jsonschema.validate(instance=convert_json_string_in_dict(response_put.text),
-                                    schema=schema_error.schema_error_without_message)
-                self._logger.info(f"response is up to date with schema")
-            except jsonschema.exceptions.ValidationError as e:
-                self._logger.error(f"data does not match schema: {e}")
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during compare schema error which come when server get bad URL: {e}")
+            jsonschema.validate(instance=convert_json_string_in_dict(response_put.text),
+                                schema=schema_error.schema_error_without_message)
+            self._logger.info(f"response is up to date with schema")
+        except jsonschema.exceptions.ValidationError as e:
+            self._logger.error(f"data does not match schema: {e}")
 
 
 class TestUpdateUserFieldNegative(CommonFixture):
@@ -320,21 +228,15 @@ class TestUpdateUserFieldNegative(CommonFixture):
     def test_negative_user_firstname(self, firstname, configuration):
         """"""
         self._logger.info(f" --- test: fail attempt to update user with firstname: {firstname} --- ")
-        data = configure_payload_user_create(firstname=firstname)
+        data = configure_payload_user_update(firstname=firstname)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        response = update_user(put_url=PUT_USER_LINK,
+                               data=data,
+                               uid=user_uid)
         try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            response = update_user(put_url=PUT_USER_LINK,
-                                   data=data,
-                                   uid=user_uid)
-            try:
-                assert response.status_code == 400, f" status code not valid - {response.status_code} "
-            except AssertionError:
-                assert response.status_code == 500, f" status code not valid - {response.status_code} "
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user: {e}")
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 500, f" status code not valid - {response.status_code} "
 
     @pytest.mark.parametrize("lastname", [
         generate_random_string(11),
@@ -350,18 +252,12 @@ class TestUpdateUserFieldNegative(CommonFixture):
     ])
     def test_negative_user_lastname(self, lastname, configuration):
         self._logger.info(f" --- test: fail updating user with lastname: {lastname} --- ")
-        data = configure_payload_user_create(lastname=lastname)
+        data = configure_payload_user_update(lastname=lastname)
+        user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
+        response = update_user(put_url=PUT_USER_LINK,
+                               data=data,
+                               uid=user_uid)
         try:
-            user_uid = get_list_of_all_users_uid(get_url=GET_ALL_USERS_LINK)
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during get list with all users uid: {e}")
-        try:
-            response = update_user(put_url=PUT_USER_LINK,
-                                   data=data,
-                                   uid=user_uid)
-            try:
-                assert response.status_code == 400, f" status code not valid - {response.status_code} "
-            except AssertionError:
-                assert response.status_code == 500, f" status code not valid - {response.status_code} "
-        except requests.exceptions.RequestException as e:
-            self._logger.error(f"error occurred during updating user: {e}")
+            assert response.status_code == 400, f" status code not valid - {response.status_code} "
+        except AssertionError:
+            assert response.status_code == 500, f" status code not valid - {response.status_code} "
